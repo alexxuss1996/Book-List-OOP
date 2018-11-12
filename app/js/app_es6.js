@@ -54,6 +54,50 @@ class UI {
 	}
 }
 
+// Local Storage Class 
+class Store {
+	static getBooks() {
+		let books;
+		if (localStorage.getItem("books") === null) {
+			books = [];
+		} else {
+			books =	JSON.parse(localStorage.getItem("books"))
+		}
+		return books;
+	}
+	
+	static displayBooks() {
+		const books = Store.getBooks();
+		
+
+		books.forEach(function(book){
+			const ui = new UI;
+			ui.addBookToList(book);
+		});
+	}
+	static addBook(book) {
+		const books = Store.getBooks();
+		
+		books.push(book);
+		
+		localStorage.setItem("books", JSON.stringify(books));
+	}
+	
+	static removeBook(isbn) {
+		const books = Store.getBooks();
+		books.forEach(function(book, index){
+			if (book.isbn = isbn) {
+				books.splice(index, 1)
+			}
+		})
+
+		localStorage.setItem("books", JSON.stringify(books));
+	}
+
+}
+
+document.addEventListener("DOMContentLoaded", Store.displayBooks);
+
 // Add Event Listener form
 document.querySelector("#book-form").addEventListener("submit", function(e) {
   // Get form values
@@ -72,7 +116,10 @@ document.querySelector("#book-form").addEventListener("submit", function(e) {
     ui.showAlert("Please fill in all fields!", "error");
   } else {
     // Add Book to List
-    ui.addBookToList(book);
+		ui.addBookToList(book);
+		
+		// Add book to LS
+		Store.addBook(book);
     // Successful
     ui.showAlert("Book added!", "success");
     // Clear fields
@@ -85,8 +132,10 @@ document.querySelector("#book-form").addEventListener("submit", function(e) {
 document.querySelector("#book-list").addEventListener("click", function(e) {
   // Instantiate UI
   const ui = new UI();
-
-  ui.deleteBook(e.target.parentElement);
+	//Delete book
+	ui.deleteBook(e.target.parentElement);
+	// Del book from LS
+	Store.removeBook(e.target.parentElement.parentElement.previousElementSibling.textContent)
 
   // Show alert
   ui.showAlert("Book removed!", "success");
